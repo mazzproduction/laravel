@@ -24,16 +24,15 @@ final class ServiceProvider extends BaseServiceProvider implements DeferrablePro
     {
         $this->app->singleton(ClientContract::class, static function (): Client {
             $apiKey = config('openai.api_key');
-            $organization = config('openai.organization');
-
-            if (! is_string($apiKey) || ($organization !== null && ! is_string($organization))) {
+        
+            if (! is_string($apiKey)) {
                 throw ApiKeyIsMissing::create();
             }
-
+        
             return OpenAI::factory()
-                ->withApiKey($apiKey)
-                ->withOrganization($organization)
-                ->withHttpHeader('OpenAI-Beta', 'assistants=v1')
+                ->withBaseUri('api.hku.hk/openai/deployments/chatgpt/chat/completions?api-version=2023-03-15-preview')
+                ->withHttpHeader('api-key', '{your-api-key}')
+                // ->withQueryParam('api-version', '{version}')
                 ->withHttpClient(new \GuzzleHttp\Client(['timeout' => config('openai.request_timeout', 30)]))
                 ->make();
         });
